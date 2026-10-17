@@ -3,63 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AMO Ambulans Dash - Terengganu</title>
+  <title>AMO Ambulans Dash & Leaderboard - Terengganu</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { text-align: center; background-color: #1a202c; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 12px; }
-    h1 { font-size: 22px; margin-bottom: 4px; color: #63b3ed; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    p { font-size: 13px; color: #cbd5e0; margin-bottom: 12px; }
-    #gameCanvas { background: linear-gradient(to bottom, #3182ce, #63b3ed, #bee3f8); border: 3px solid #2b6cb0; border-radius: 12px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); touch-action: manipulation; max-width: 100%; }
-    .form-container { margin-top: 15px; background: #2d3748; padding: 18px; border-radius: 10px; width: 320px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
-    .form-container h3 { text-align: center; color: #f6ad55; margin-bottom: 5px; }
-    .form-container p.score-text { text-align: center; margin-bottom: 12px; font-size: 14px; }
-    label { font-size: 12px; color: #e2e8f0; margin-top: 6px; display: block; }
-    input, select { width: 100%; padding: 10px; margin: 4px 0 10px 0; border-radius: 6px; border: 1px solid #4a5568; background: #1a202c; color: white; font-size: 14px; }
-    button { width: 100%; padding: 11px; background: #3182ce; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-    button:hover { background: #2b6cb0; }
-    #statusMsg { margin-top: 10px; font-size: 12px; text-align: center; font-weight: bold; }
+    body { text-align: center; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
+    h1 { font-size: 22px; color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); margin-bottom: 4px; }
+    p.sub { font-size: 13px; color: #94a3b8; margin-bottom: 15px; }
+
+    /* LAYOUT CONTAINER */
+    .main-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: flex-start; max-width: 800px; width: 100%; }
+
+    /* GAME CANVAS */
+    #gameCanvas { background: linear-gradient(to bottom, #0284c7, #38bdf8, #bae6fd); border: 3px solid #0284c7; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); touch-action: manipulation; }
+
+    /* DASHBOARD LEADERBOARD PREMIUM */
+    .leaderboard-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 16px; width: 340px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+    .leaderboard-card h2 { font-size: 18px; color: #facc15; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* PODIUM TOP 3 DESIGN */
+    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 20px; height: 130px; }
+    .podium { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 8px 8px 0 0; padding: 6px; width: 90px; color: #0f172a; font-weight: bold; font-size: 11px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .podium .score { font-size: 14px; font-weight: 800; margin-top: 2px; }
+    .podium .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+
+    /* WARNA PODIUM */
+    .rank-1 { height: 110px; background: linear-gradient(135deg, #ffe066, #f59e0b); border: 2px solid #fbbf24; order: 2; } /* EMAS */
+    .rank-2 { height: 85px; background: linear-gradient(135deg, #e2e8f0, #94a3b8); border: 2px solid #cbd5e0; order: 1; }  /* PERAK */
+    .rank-3 { height: 65px; background: linear-gradient(135deg, #fdba74, #b45309); border: 2px solid #f97316; order: 3; color: white; } /* GANGSA */
+
+    /* CARTA SENARAI */
+    .rank-list { text-align: left; background: #0f172a; border-radius: 8px; padding: 8px; max-height: 180px; overflow-y: auto; }
+    .rank-item { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid #1e293b; font-size: 12px; }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-num { font-weight: bold; color: #38bdf8; width: 25px; }
+
+    /* BORANG SKOR */
+    .form-container { margin-top: 15px; background: #1e293b; padding: 18px; border-radius: 12px; width: 320px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
+    label { font-size: 12px; color: #cbd5e0; margin-top: 6px; display: block; }
+    input, select { width: 100%; padding: 9px; margin: 4px 0 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; }
+    button { width: 100%; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; }
+    button:hover { background: #0369a1; }
+    #statusMsg { margin-top: 8px; font-size: 12px; text-align: center; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <h1>🚑 AMO Terengganu: Ambulans Dash</h1>
-  <p>Tap skrin / tekan Spacebar untuk kawal Ambulans!</p>
+  <p class="sub">Kawal Ambulans, kumpul mata tertinggi & cipta rekod carta!</p>
 
-  <canvas id="gameCanvas" width="320" height="420"></canvas>
-
-  <div class="form-container" id="scoreForm" style="display: none;">
-    <h3>TAMAT GAME!</h3>
-    <p class="score-text">Skor Anda: <b id="finalScore" style="font-size: 20px; color: #f6ad55;">0</b></p>
+  <div class="main-container">
     
-    <label for="nama">Nama Penuh / FB:</label>
-    <input type="text" id="nama" placeholder="Contoh: Ahmad Zaki" required>
-    
-    <label for="noTel">No. WhatsApp:</label>
-    <input type="tel" id="noTel" placeholder="Contoh: 0139876543" required>
-    
-    <label for="daerah">Daerah (Terengganu):</label>
-    <select id="daerah" required>
-      <option value="">-- Pilih Daerah --</option>
-      <option value="Kuala Terengganu">Kuala Terengganu</option>
-      <option value="Kuala Nerus">Kuala Nerus</option>
-      <option value="Marang">Marang</option>
-      <option value="Hulu Terengganu">Hulu Terengganu</option>
-      <option value="Dungun">Dungun</option>
-      <option value="Kemaman">Kemaman</option>
-      <option value="Besut">Besut</option>
-      <option value="Setiu">Setiu</option>
-      <option value="Luar Terengganu">Luar Terengganu</option>
-    </select>
+    <!-- BAHAGIAN GAME -->
+    <div>
+      <canvas id="gameCanvas" width="320" height="400"></canvas>
 
-    <label for="kategori">Kategori Pemain:</label>
-    <select id="kategori">
-      <option value="Orang Awam">Orang Awam</option>
-      <option value="Warga KKM / AMO">Warga KKM / AMO</option>
-    </select>
+      <div class="form-container" id="scoreForm" style="display: none;">
+        <h3 style="text-align: center; color: #facc15;">TAMAT GAME!</h3>
+        <p style="text-align: center; font-size: 14px; margin-bottom: 10px;">Skor Anda: <b id="finalScore" style="font-size: 20px; color: #f87171;">0</b></p>
+        
+        <label>Nama Penuh / FB:</label>
+        <input type="text" id="nama" placeholder="Ahmad Zaki" required>
+        
+        <label>No. WhatsApp:</label>
+        <input type="tel" id="noTel" placeholder="0139876543" required>
+        
+        <label>Daerah (Terengganu):</label>
+        <select id="daerah" required>
+          <option value="">-- Pilih Daerah --</option>
+          <option value="Kuala Terengganu">Kuala Terengganu</option>
+          <option value="Kuala Nerus">Kuala Nerus</option>
+          <option value="Marang">Marang</option>
+          <option value="Hulu Terengganu">Hulu Terengganu</option>
+          <option value="Dungun">Dungun</option>
+          <option value="Kemaman">Kemaman</option>
+          <option value="Besut">Besut</option>
+          <option value="Setiu">Setiu</option>
+          <option value="Luar Terengganu">Luar Terengganu</option>
+        </select>
 
-    <button onclick="hantarSkor()">Hantar Skor 🏆</button>
-    <p id="statusMsg"></p>
-    <button onclick="resetGame()" style="background: #4a5568; margin-top: 8px;">Main Lagi 🔄</button>
+        <label>Kategori:</label>
+        <select id="kategori">
+          <option value="Orang Awam">Orang Awam</option>
+          <option value="Warga KKM / AMO">Warga KKM / AMO</option>
+        </select>
+
+        <button onclick="hantarSkor()">Hantar Skor 🏆</button>
+        <p id="statusMsg"></p>
+        <button onclick="resetGame()" style="background: #475569; margin-top: 6px;">Main Lagi 🔄</button>
+      </div>
+    </div>
+
+    <!-- BAHAGIAN DASHBOARD LEADERBOARD PREMIUM -->
+    <div class="leaderboard-card">
+      <h2>🏆 CARTA JUARA (TOP 3)</h2>
+      
+      <!-- PENTAS PODIUM TOP 3 -->
+      <div class="podium-container">
+        <!-- RANK 2 (PERAK) -->
+        <div class="podium rank-2">
+          <span>🥈 PERAK</span>
+          <span class="name" id="p2-name">-</span>
+          <span class="score" id="p2-score">0</span>
+        </div>
+        <!-- RANK 1 (EMAS) -->
+        <div class="podium rank-1">
+          <span>👑 EMAS</span>
+          <span class="name" id="p1-name">-</span>
+          <span class="score" id="p1-score">0</span>
+        </div>
+        <!-- RANK 3 (GANGSA) -->
+        <div class="podium rank-3">
+          <span>🥉 GANGSA</span>
+          <span class="name" id="p3-name">-</span>
+          <span class="score" id="p3-score">0</span>
+        </div>
+      </div>
+
+      <h4 style="text-align: left; font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Kedudukan Seterusnya:</h4>
+      <div class="rank-list" id="rankList">
+        <p style="text-align: center; color: #64748b; padding: 10px;">Memuatkan leaderboard...</p>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -67,9 +132,8 @@
     const ctx = canvas.getContext("2d");
 
     // PASTE URL GOOGLE APPS SCRIPT ANDA DI SINI
-    const SCRIPT_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzBd9zy6iiW5BORG78j0gbK9A6aCSMPWe9E_-HkrN681at7OaDsMnbdk7iXBatqHT1WtQ/exec";
+    const SCRIPT_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzSf8geUs_qyx36vwUHlQHjbOif8Kld-FPRcSYgLUj1TiY3voiI7iNtv1jxea9pxbdBdA/exec";
 
-    // KETETAPAN MOD MUDAH: Graviti lebih lembut (0.22) & Lompatan sederhana (-5.0)
     let ambulans = { x: 50, y: 150, w: 38, h: 26, gravity: 0.22, lift: -5.0, velocity: 0 };
     let obstacles = [];
     let frame = 0;
@@ -81,46 +145,38 @@
       let x = ambulans.x;
       let y = ambulans.y;
 
-      // 1. Bayangan 3D di bawah
       ctx.fillStyle = "rgba(0,0,0,0.25)";
       ctx.beginPath();
       ctx.ellipse(x + 19, y + 28, 16, 5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Sisi Gelap 3D
       ctx.fillStyle = "#cbd5e0";
       ctx.fillRect(x + 3, y + 3, 35, 20);
 
-      // 3. Badan Utama (Putih)
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(x, y, 35, 20);
 
-      // 4. Bumbung 3D
       ctx.fillStyle = "#f7fafc";
       ctx.fillRect(x + 2, y - 3, 30, 5);
 
-      // 5. Cermin Hadapan
-      ctx.fillStyle = "#2b6cb0";
+      ctx.fillStyle = "#0284c7";
       ctx.fillRect(x + 24, y + 3, 9, 8);
-      ctx.fillStyle = "#63b3ed";
+      ctx.fillStyle = "#38bdf8";
       ctx.fillRect(x + 26, y + 4, 4, 4);
 
-      // 6. Jalur Merah & Palang Merah
-      ctx.fillStyle = "#e53e3e";
+      ctx.fillStyle = "#ef4444";
       ctx.fillRect(x, y + 12, 35, 4);
       ctx.fillRect(x + 11, y + 4, 6, 6);
       ctx.fillRect(x + 13, y + 2, 2, 10);
 
-      // 7. Lampu Siren 3D (Berkelip)
-      let sirenColor = (frame % 16 < 8) ? "#e53e3e" : "#3182ce";
+      let sirenColor = (frame % 16 < 8) ? "#ef4444" : "#0284c7";
       ctx.fillStyle = sirenColor;
       ctx.shadowColor = sirenColor;
       ctx.shadowBlur = 8;
       ctx.fillRect(x + 13, y - 7, 9, 4);
       ctx.shadowBlur = 0;
 
-      // 8. Tayar & Rim
-      ctx.fillStyle = "#1a202c";
+      ctx.fillStyle = "#0f172a";
       ctx.fillRect(x + 6, y + 18, 8, 8);
       ctx.fillRect(x + 22, y + 18, 8, 8);
       
@@ -130,8 +186,7 @@
     }
 
     function createObstacle() {
-      // JURANG LEBIH LUAS (160px) supaya sangat mudah lalu
-      let gap = 160; 
+      let gap = 160;
       let minHeight = 30;
       let maxHeight = canvas.height - gap - minHeight;
       let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
@@ -154,12 +209,11 @@
         endGame();
       }
 
-      // JARAK BANGUNAN LEBIH JAUH (Setiap 120 frame)
       if (frame % 120 === 0) createObstacle();
 
       for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
-        obs.x -= 1.6; // Kelajuan pergerakan diperlahankan sedikit
+        obs.x -= 1.6;
 
         if (
           ambulans.x < obs.x + 40 &&
@@ -181,18 +235,18 @@
     }
 
     function draw() {
-      ctx.fillStyle = "#70c5ce";
+      ctx.fillStyle = "#38bdf8";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       for (let obs of obstacles) {
-        ctx.fillStyle = "#2d3748";
+        ctx.fillStyle = "#1e293b";
         ctx.fillRect(obs.x, 0, 40, obs.top);
-        ctx.fillStyle = "#4a5568";
+        ctx.fillStyle = "#334155";
         ctx.fillRect(obs.x + 33, 0, 7, obs.top);
 
-        ctx.fillStyle = "#2d3748";
+        ctx.fillStyle = "#1e293b";
         ctx.fillRect(obs.x, canvas.height - obs.bottom, 40, obs.bottom);
-        ctx.fillStyle = "#4a5568";
+        ctx.fillStyle = "#334155";
         ctx.fillRect(obs.x + 33, canvas.height - obs.bottom, 7, obs.bottom);
       }
 
@@ -206,9 +260,9 @@
       ctx.shadowBlur = 0;
 
       if (!gameStarted) {
-        ctx.fillStyle = "#1a202c";
+        ctx.fillStyle = "#0f172a";
         ctx.font = "bold 14px Arial";
-        ctx.fillText("Tekan/Tap Skrin Untuk Mula!", 65, 200);
+        ctx.fillText("Tekan/Tap Skrin Untuk Mula!", 65, 190);
       }
     }
 
@@ -246,6 +300,34 @@
       loop();
     }
 
+    // FUNGSI MUAT TURUN LEADERBOARD
+    function loadLeaderboard() {
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (!data || data.length === 0) return;
+
+          // Isi Top 3 (Podium)
+          if (data[0]) { document.getElementById("p1-name").innerText = data[0].nama; document.getElementById("p1-score").innerText = data[0].score; }
+          if (data[1]) { document.getElementById("p2-name").innerText = data[1].nama; document.getElementById("p2-score").innerText = data[1].score; }
+          if (data[2]) { document.getElementById("p3-name").innerText = data[2].nama; document.getElementById("p3-score").innerText = data[2].score; }
+
+          // Isi Senarai Ranking 4 Ke Atas
+          let rankListHTML = "";
+          for (let i = 3; i < data.length; i++) {
+            rankListHTML += `
+              <div class="rank-item">
+                <span class="rank-num">#${i + 1}</span>
+                <span><b>${data[i].nama}</b> (${data[i].daerah})</span>
+                <span style="color: #facc15; font-weight: bold;">${data[i].score} pts</span>
+              </div>
+            `;
+          }
+          document.getElementById("rankList").innerHTML = rankListHTML || "<p style='text-align:center; color:#64748b;'>Tiada data tambahan</p>";
+        })
+        .catch(err => console.error("Error loading leaderboard:", err));
+    }
+
     function hantarSkor() {
       let nama = document.getElementById("nama").value;
       let noTel = document.getElementById("noTel").value;
@@ -258,7 +340,7 @@
         return;
       }
 
-      statusMsg.style.color = "#ebd05b";
+      statusMsg.style.color = "#facc15";
       statusMsg.innerText = "Menghantar data...";
 
       fetch(SCRIPT_URL, {
@@ -274,16 +356,18 @@
         })
       })
       .then(() => {
-        statusMsg.style.color = "#68d391";
-        statusMsg.innerText = "✅ Skor berjaya dihantar ke Leaderboard!";
+        statusMsg.style.color = "#4ade80";
+        statusMsg.innerText = "✅ Skor berjaya dihantar!";
+        setTimeout(() => { loadLeaderboard(); }, 1500); // Kemaskini Carta secara automatik
       })
       .catch(err => {
-        statusMsg.style.color = "#fc8181";
-        statusMsg.innerText = "❌ Gagal hantar data. Cuba lagi.";
-        console.error(err);
+        statusMsg.style.color = "#f87171";
+        statusMsg.innerText = "❌ Gagal hantar data.";
       });
     }
 
+    // Muat turun leaderboard kali pertama apabila laman dibuka
+    loadLeaderboard();
     loop();
   </script>
 </body>
