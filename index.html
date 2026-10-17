@@ -69,14 +69,14 @@
     // PASTE URL GOOGLE APPS SCRIPT ANDA DI SINI
     const SCRIPT_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzBd9zy6iiW5BORG78j0gbK9A6aCSMPWe9E_-HkrN681at7OaDsMnbdk7iXBatqHT1WtQ/exec";
 
-    let ambulans = { x: 50, y: 150, w: 38, h: 26, gravity: 0.35, lift: -6.5, velocity: 0 };
+    // KETETAPAN MOD MUDAH: Graviti lebih lembut (0.22) & Lompatan sederhana (-5.0)
+    let ambulans = { x: 50, y: 150, w: 38, h: 26, gravity: 0.22, lift: -5.0, velocity: 0 };
     let obstacles = [];
     let frame = 0;
     let score = 0;
     let gameOver = false;
     let gameStarted = false;
 
-    // LUKISAN AMBULANS 3D KEMAS & MODEN
     function drawAmbulans() {
       let x = ambulans.x;
       let y = ambulans.y;
@@ -87,51 +87,52 @@
       ctx.ellipse(x + 19, y + 28, 16, 5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Sisi Gelap 3D (Depth)
+      // 2. Sisi Gelap 3D
       ctx.fillStyle = "#cbd5e0";
       ctx.fillRect(x + 3, y + 3, 35, 20);
 
-      // 3. Badan Utama (Putih Bersih)
+      // 3. Badan Utama (Putih)
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(x, y, 35, 20);
 
-      // 4. Bumbung 3D (Lengkung Putih Terang)
+      // 4. Bumbung 3D
       ctx.fillStyle = "#f7fafc";
       ctx.fillRect(x + 2, y - 3, 30, 5);
 
-      // 5. Cermin Hadapan (3D Blue Glass Effect)
+      // 5. Cermin Hadapan
       ctx.fillStyle = "#2b6cb0";
       ctx.fillRect(x + 24, y + 3, 9, 8);
-      ctx.fillStyle = "#63b3ed"; // Kilauan cermin
+      ctx.fillStyle = "#63b3ed";
       ctx.fillRect(x + 26, y + 4, 4, 4);
 
-      // 6. Jalur Merah & Lambang Palang Merah
+      // 6. Jalur Merah & Palang Merah
       ctx.fillStyle = "#e53e3e";
-      ctx.fillRect(x, y + 12, 35, 4); // Jalur badan
-      ctx.fillRect(x + 11, y + 4, 6, 6); // Palang Merah
+      ctx.fillRect(x, y + 12, 35, 4);
+      ctx.fillRect(x + 11, y + 4, 6, 6);
       ctx.fillRect(x + 13, y + 2, 2, 10);
 
-      // 7. Lampu Siren 3D (Berkelip Merah & Biru + Effect Light Glow)
+      // 7. Lampu Siren 3D (Berkelip)
       let sirenColor = (frame % 16 < 8) ? "#e53e3e" : "#3182ce";
       ctx.fillStyle = sirenColor;
       ctx.shadowColor = sirenColor;
       ctx.shadowBlur = 8;
       ctx.fillRect(x + 13, y - 7, 9, 4);
-      ctx.shadowBlur = 0; // Reset glow
+      ctx.shadowBlur = 0;
 
-      // 8. Tayar 3D & Rim Perak
+      // 8. Tayar & Rim
       ctx.fillStyle = "#1a202c";
       ctx.fillRect(x + 6, y + 18, 8, 8);
       ctx.fillRect(x + 22, y + 18, 8, 8);
       
-      ctx.fillStyle = "#e2e8f0"; // Rim
+      ctx.fillStyle = "#e2e8f0";
       ctx.fillRect(x + 8, y + 20, 4, 4);
       ctx.fillRect(x + 24, y + 20, 4, 4);
     }
 
     function createObstacle() {
-      let gap = 120;
-      let minHeight = 40;
+      // JURANG LEBIH LUAS (160px) supaya sangat mudah lalu
+      let gap = 160; 
+      let minHeight = 30;
       let maxHeight = canvas.height - gap - minHeight;
       let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
 
@@ -153,54 +154,50 @@
         endGame();
       }
 
-      if (frame % 90 === 0) createObstacle();
+      // JARAK BANGUNAN LEBIH JAUH (Setiap 120 frame)
+      if (frame % 120 === 0) createObstacle();
 
       for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
-        obs.x -= 2;
+        obs.x -= 1.6; // Kelajuan pergerakan diperlahankan sedikit
 
         if (
-          ambulans.x < obs.x + 42 &&
+          ambulans.x < obs.x + 40 &&
           ambulans.x + ambulans.w > obs.x &&
           (ambulans.y < obs.top || ambulans.y + ambulans.h > canvas.height - obs.bottom)
         ) {
           endGame();
         }
 
-        if (obs.x + 42 < ambulans.x && !obs.passed) {
+        if (obs.x + 40 < ambulans.x && !obs.passed) {
           score++;
           obs.passed = true;
         }
       }
 
-      if (obstacles.length && obstacles[0].x < -42) obstacles.shift();
+      if (obstacles.length && obstacles[0].x < -40) obstacles.shift();
 
       frame++;
     }
 
     function draw() {
-      // Latar Langit
       ctx.fillStyle = "#70c5ce";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Halangan Bangunan 3D
       for (let obs of obstacles) {
-        // Bangunan Atas
         ctx.fillStyle = "#2d3748";
-        ctx.fillRect(obs.x, 0, 42, obs.top);
+        ctx.fillRect(obs.x, 0, 40, obs.top);
         ctx.fillStyle = "#4a5568";
-        ctx.fillRect(obs.x + 35, 0, 7, obs.top); // Sisi 3D
+        ctx.fillRect(obs.x + 33, 0, 7, obs.top);
 
-        // Bangunan Bawah
         ctx.fillStyle = "#2d3748";
-        ctx.fillRect(obs.x, canvas.height - obs.bottom, 42, obs.bottom);
+        ctx.fillRect(obs.x, canvas.height - obs.bottom, 40, obs.bottom);
         ctx.fillStyle = "#4a5568";
-        ctx.fillRect(obs.x + 35, canvas.height - obs.bottom, 7, obs.bottom); // Sisi 3D
+        ctx.fillRect(obs.x + 33, canvas.height - obs.bottom, 7, obs.bottom);
       }
 
       drawAmbulans();
 
-      // PAPARAN SKOR
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 18px Arial";
       ctx.shadowColor = "rgba(0,0,0,0.5)";
