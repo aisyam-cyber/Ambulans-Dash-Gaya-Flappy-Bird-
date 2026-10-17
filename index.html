@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMO Ambulans Dash - Terengganu</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { text-align: center; background-color: #1a202c; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 12px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #63b3ed; }
+    p { font-size: 13px; color: #cbd5e0; margin-bottom: 12px; }
+    #gameCanvas { background: #70c5ce; border: 3px solid #3182ce; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); touch-action: manipulation; max-width: 100%; }
+    .form-container { margin-top: 15px; background: #2d3748; padding: 18px; border-radius: 8px; width: 320px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); text-align: left; }
+    .form-container h3 { text-align: center; color: #f6ad55; margin-bottom: 5px; }
+    .form-container p.score-text { text-align: center; margin-bottom: 12px; font-size: 14px; }
+    label { font-size: 12px; color: #e2e8f0; margin-top: 6px; display: block; }
+    input, select { width: 100%; padding: 10px; margin: 4px 0 10px 0; border-radius: 5px; border: 1px solid #4a5568; background: #1a202c; color: white; font-size: 14px; }
+    button { width: 100%; padding: 11px; background: #3182ce; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; }
+    button:hover { background: #2b6cb0; }
+    #statusMsg { margin-top: 10px; font-size: 12px; text-align: center; color: #68d391; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>🚑 AMO Terengganu: Ambulans Dash</h1>
+  <p>Tap skrin / tekan Spacebar untuk elak halangan!</p>
+
+  <canvas id="gameCanvas" width="320" height="420"></canvas>
+
+  <div class="form-container" id="scoreForm" style="display: none;">
+    <h3>TAMAT GAME!</h3>
+    <p class="score-text">Skor Anda: <b id="finalScore" style="font-size: 20px; color: #f6ad55;">0</b></p>
+    
+    <label for="nama">Nama Penuh / FB:</label>
+    <input type="text" id="nama" placeholder="Contoh: Ahmad Zaki" required>
+    
+    <label for="noTel">No. WhatsApp:</label>
+    <input type="tel" id="noTel" placeholder="Contoh: 0139876543" required>
+    
+    <label for="daerah">Daerah (Terengganu):</label>
+    <select id="daerah" required>
+      <option value="">-- Pilih Daerah --</option>
+      <option value="Kuala Terengganu">Kuala Terengganu</option>
+      <option value="Kuala Nerus">Kuala Nerus</option>
+      <option value="Marang">Marang</option>
+      <option value="Hulu Terengganu">Hulu Terengganu</option>
+      <option value="Dungun">Dungun</option>
+      <option value="Kemaman">Kemaman</option>
+      <option value="Besut">Besut</option>
+      <option value="Setiu">Setiu</option>
+      <option value="Luar Terengganu">Luar Terengganu</option>
+    </select>
+
+    <label for="kategori">Kategori Pemain:</label>
+    <select id="kategori">
+      <option value="Orang Awam">Orang Awam</option>
+      <option value="Warga KKM / AMO">Warga KKM / AMO</option>
+    </select>
+
+    <button onclick="hantarSkor()">Hantar Skor 🏆</button>
+    <p id="statusMsg"></p>
+    <button onclick="resetGame()" style="background: #4a5568; margin-top: 8px;">Main Lagi 🔄</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // PASTE URL GOOGLE APPS SCRIPT ANDA DI SINI
+    const SCRIPT_URL = "GANTI_DENGAN_URL_WEB_APP_ANDA";
+
+    let ambulans = { x: 50, y: 150, w: 30, h: 20, gravity: 0.35, lift: -6.5, velocity: 0 };
+    let obstacles = [];
+    let frame = 0;
+    let score = 0;
+    let gameOver = false;
+    let gameStarted = false;
+
+    function drawAmbulans() {
+      // Badan Ambulans
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(ambulans.x, ambulans.y, ambulans.w, ambulans.h);
+      // Palang Merah Kecemasan
+      ctx.fillStyle = "#e53e3e";
+      ctx.fillRect(ambulans.x + 12, ambulans.y + 4, 6, 12);
+      ctx.fillRect(ambulans.x + 9, ambulans.y + 7, 12, 6);
+      // Tayar
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(ambulans.x + 4, ambulans.y + 18, 6, 4);
+      ctx.fillRect(ambulans.x + 20, ambulans.y + 18, 6, 4);
+    }
+
+    function createObstacle() {
+      let gap = 115;
+      let minHeight = 40;
+      let maxHeight = canvas.height - gap - minHeight;
+      let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+
+      obstacles.push({
+        x: canvas.width,
+        top: height,
+        bottom: canvas.height - height - gap,
+        passed: false
+      });
+    }
+
+    function update() {
+      if (!gameStarted || gameOver) return;
+
+      ambulans.velocity += ambulans.gravity;
+      ambulans.y += ambulans.velocity;
+
+      if (ambulans.y + ambulans.h >= canvas.height || ambulans.y <= 0) {
+        endGame();
+      }
+
+      if (frame % 90 === 0) createObstacle();
+
+      for (let i = 0; i < obstacles.length; i++) {
+        let obs = obstacles[i];
+        obs.x -= 2;
+
+        if (
+          ambulans.x < obs.x + 40 &&
+          ambulans.x + ambulans.w > obs.x &&
+          (ambulans.y < obs.top || ambulans.y + ambulans.h > canvas.height - obs.bottom)
+        ) {
+          endGame();
+        }
+
+        if (obs.x + 40 < ambulans.x && !obs.passed) {
+          score++;
+          obs.passed = true;
+        }
+      }
+
+      if (obstacles.length && obstacles[0].x < -40) obstacles.shift();
+
+      frame++;
+    }
+
+    function draw() {
+      ctx.fillStyle = "#70c5ce";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#4a5568";
+      for (let obs of obstacles) {
+        ctx.fillRect(obs.x, 0, 40, obs.top);
+        ctx.fillRect(obs.x, canvas.height - obs.bottom, 40, obs.bottom);
+      }
+
+      drawAmbulans();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px Arial";
+      ctx.fillText("Skor: " + score, 15, 30);
+
+      if (!gameStarted) {
+        ctx.fillStyle = "#1a202c";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("Tekan/Tap Skrin Untuk Mula!", 65, 200);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      if (!gameOver) requestAnimationFrame(loop);
+    }
+
+    function jump() {
+      if (!gameStarted) gameStarted = true;
+      if (!gameOver) ambulans.velocity = ambulans.lift;
+    }
+
+    window.addEventListener("keydown", (e) => { if (e.code === "Space") jump(); });
+    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); jump(); });
+    canvas.addEventListener("mousedown", jump);
+
+    function endGame() {
+      gameOver = true;
+      document.getElementById("finalScore").innerText = score;
+      document.getElementById("scoreForm").style.display = "block";
+    }
+
+    function resetGame() {
+      ambulans.y = 150;
+      ambulans.velocity = 0;
+      obstacles = [];
+      frame = 0;
+      score = 0;
+      gameOver = false;
+      gameStarted = false;
+      document.getElementById("scoreForm").style.display = "none";
+      document.getElementById("statusMsg").innerText = "";
+      loop();
+    }
+
+    function hantarSkor() {
+      let nama = document.getElementById("nama").value;
+      let noTel = document.getElementById("noTel").value;
+      let daerah = document.getElementById("daerah").value;
+      let kategori = document.getElementById("kategori").value;
+      let statusMsg = document.getElementById("statusMsg");
+
+      if (!nama || !noTel || !daerah) {
+        alert("Sila isi Nama, No. WhatsApp, dan Pilih Daerah!");
+        return;
+      }
+
+      statusMsg.style.color = "#ebd05b";
+      statusMsg.innerText = "Menghantar data...";
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          nama: nama, 
+          noTel: noTel, 
+          daerah: daerah, 
+          kategori: kategori, 
+          score: score 
+        })
+      })
+      .then(() => {
+        statusMsg.style.color = "#68d391";
+        statusMsg.innerText = "✅ Skor berjaya dihantar ke Leaderboard!";
+      })
+      .catch(err => {
+        statusMsg.style.color = "#fc8181";
+        statusMsg.innerText = "❌ Gagal hantar data. Cuba lagi.";
+        console.error(err);
+      });
+    }
+
+    loop();
+  </script>
+</body>
+</html>
