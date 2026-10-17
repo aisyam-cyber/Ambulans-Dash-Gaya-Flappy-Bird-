@@ -11,31 +11,53 @@
     p.sub { font-size: 13px; color: #94a3b8; margin-bottom: 15px; }
 
     /* LAYOUT CONTAINER */
-    .main-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: flex-start; max-width: 800px; width: 100%; }
+    .main-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: flex-start; max-width: 850px; width: 100%; }
 
     /* GAME CANVAS */
     #gameCanvas { background: linear-gradient(to bottom, #0284c7, #38bdf8, #bae6fd); border: 3px solid #0284c7; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); touch-action: manipulation; }
 
     /* DASHBOARD LEADERBOARD PREMIUM */
-    .leaderboard-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 16px; width: 340px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+    .leaderboard-card { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 16px; width: 350px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
     .leaderboard-card h2 { font-size: 18px; color: #facc15; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* PODIUM TOP 3 DESIGN */
-    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 20px; height: 130px; }
-    .podium { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 8px 8px 0 0; padding: 6px; width: 90px; color: #0f172a; font-weight: bold; font-size: 11px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .podium .score { font-size: 14px; font-weight: 800; margin-top: 2px; }
-    .podium .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+    /* PODIUM TOP 3 DESIGN (NAMA TAK TERPOTONG) */
+    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 15px; width: 100%; height: 160px; }
+    .podium { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 10px 10px 0 0; padding: 8px 4px; width: 32%; color: #0f172a; font-weight: bold; font-size: 11px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .podium .score { font-size: 15px; font-weight: 800; margin-top: 3px; background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 10px; }
+    
+    /* Kemasan Nama Penuh (Kemudahan Baca) */
+    .podium .name { 
+      font-size: 11px; 
+      line-height: 1.2; 
+      margin-top: 4px; 
+      word-break: break-word; 
+      display: -webkit-box; 
+      -webkit-line-clamp: 2; 
+      -webkit-box-orient: vertical; 
+      overflow: hidden; 
+      text-align: center;
+    }
 
     /* WARNA PODIUM */
-    .rank-1 { height: 110px; background: linear-gradient(135deg, #ffe066, #f59e0b); border: 2px solid #fbbf24; order: 2; } /* EMAS */
-    .rank-2 { height: 85px; background: linear-gradient(135deg, #e2e8f0, #94a3b8); border: 2px solid #cbd5e0; order: 1; }  /* PERAK */
-    .rank-3 { height: 65px; background: linear-gradient(135deg, #fdba74, #b45309); border: 2px solid #f97316; order: 3; color: white; } /* GANGSA */
+    .rank-1 { height: 140px; background: linear-gradient(135deg, #ffe066, #f59e0b); border: 2px solid #fbbf24; order: 2; } /* EMAS */
+    .rank-2 { height: 115px; background: linear-gradient(135deg, #e2e8f0, #94a3b8); border: 2px solid #cbd5e0; order: 1; }  /* PERAK */
+    .rank-3 { height: 95px; background: linear-gradient(135deg, #fdba74, #b45309); border: 2px solid #f97316; order: 3; color: white; } /* GANGSA */
 
-    /* CARTA SENARAI */
-    .rank-list { text-align: left; background: #0f172a; border-radius: 8px; padding: 8px; max-height: 180px; overflow-y: auto; }
-    .rank-item { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid #1e293b; font-size: 12px; }
+    /* BUTANG POPUP */
+    .btn-view-all { width: 100%; padding: 12px; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: 1px solid #38bdf8; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; transition: all 0.2s; margin-top: 5px; }
+    .btn-view-all:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
+
+    /* POP-UP MODAL CARTA PENUH */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
+    .modal-content { background: #1e293b; border: 1px solid #38bdf8; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-header h3 { color: #facc15; font-size: 16px; }
+    .close-btn { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; font-weight: bold; width: auto; padding: 0; }
+    
+    .rank-list { text-align: left; background: #0f172a; border-radius: 8px; padding: 8px; overflow-y: auto; flex-grow: 1; }
+    .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #1e293b; font-size: 13px; }
     .rank-item:last-child { border-bottom: none; }
-    .rank-num { font-weight: bold; color: #38bdf8; width: 25px; }
+    .rank-num { font-weight: bold; color: #38bdf8; width: 30px; }
 
     /* BORANG SKOR */
     .form-container { margin-top: 15px; background: #1e293b; padding: 18px; border-radius: 12px; width: 320px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
@@ -95,7 +117,7 @@
 
     <!-- BAHAGIAN DASHBOARD LEADERBOARD PREMIUM -->
     <div class="leaderboard-card">
-      <h2>🏆 CARTA JUARA (TOP 3)</h2>
+      <h2>🏆 CARTA JUARA</h2>
       
       <!-- PENTAS PODIUM TOP 3 -->
       <div class="podium-container">
@@ -119,12 +141,23 @@
         </div>
       </div>
 
-      <h4 style="text-align: left; font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Kedudukan Seterusnya:</h4>
-      <div class="rank-list" id="rankList">
-        <p style="text-align: center; color: #64748b; padding: 10px;">Memuatkan leaderboard...</p>
-      </div>
+      <!-- BUTANG POPUP KEDUDUKAN PENUH -->
+      <button class="btn-view-all" onclick="openModal()">📜 Lihat Senarai Semua Pemenang</button>
     </div>
 
+  </div>
+
+  <!-- MODAL / POPUP SENARAI KEDUDUKAN PENUH -->
+  <div class="modal-overlay" id="leaderboardModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📜 Kedudukan Keseluruhan Pemain</h3>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="rank-list" id="rankList">
+        <p style="text-align: center; color: #64748b; padding: 15px;">Memuatkan kedudukan...</p>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -300,6 +333,10 @@
       loop();
     }
 
+    // FUNGSI POP-UP MODAL
+    function openModal() { document.getElementById("leaderboardModal").style.display = "flex"; }
+    function closeModal() { document.getElementById("leaderboardModal").style.display = "none"; }
+
     // FUNGSI MUAT TURUN LEADERBOARD
     function loadLeaderboard() {
       fetch(SCRIPT_URL)
@@ -312,9 +349,9 @@
           if (data[1]) { document.getElementById("p2-name").innerText = data[1].nama; document.getElementById("p2-score").innerText = data[1].score; }
           if (data[2]) { document.getElementById("p3-name").innerText = data[2].nama; document.getElementById("p3-score").innerText = data[2].score; }
 
-          // Isi Senarai Ranking 4 Ke Atas
+          // Isi Senarai Lengkap untuk Pop-up Modal
           let rankListHTML = "";
-          for (let i = 3; i < data.length; i++) {
+          for (let i = 0; i < data.length; i++) {
             rankListHTML += `
               <div class="rank-item">
                 <span class="rank-num">#${i + 1}</span>
@@ -323,7 +360,7 @@
               </div>
             `;
           }
-          document.getElementById("rankList").innerHTML = rankListHTML || "<p style='text-align:center; color:#64748b;'>Tiada data tambahan</p>";
+          document.getElementById("rankList").innerHTML = rankListHTML || "<p style='text-align:center; color:#64748b;'>Tiada data pemain lagi.</p>";
         })
         .catch(err => console.error("Error loading leaderboard:", err));
     }
@@ -358,7 +395,7 @@
       .then(() => {
         statusMsg.style.color = "#4ade80";
         statusMsg.innerText = "✅ Skor berjaya dihantar!";
-        setTimeout(() => { loadLeaderboard(); }, 1500); // Kemaskini Carta secara automatik
+        setTimeout(() => { loadLeaderboard(); }, 1500);
       })
       .catch(err => {
         statusMsg.style.color = "#f87171";
@@ -366,7 +403,6 @@
       });
     }
 
-    // Muat turun leaderboard kali pertama apabila laman dibuka
     loadLeaderboard();
     loop();
   </script>
