@@ -7,23 +7,23 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
     body { text-align: center; background-color: #1a202c; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 12px; }
-    h1 { font-size: 22px; margin-bottom: 4px; color: #63b3ed; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #63b3ed; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
     p { font-size: 13px; color: #cbd5e0; margin-bottom: 12px; }
-    #gameCanvas { background: #70c5ce; border: 3px solid #3182ce; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); touch-action: manipulation; max-width: 100%; }
-    .form-container { margin-top: 15px; background: #2d3748; padding: 18px; border-radius: 8px; width: 320px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); text-align: left; }
+    #gameCanvas { background: linear-gradient(to bottom, #3182ce, #63b3ed, #bee3f8); border: 3px solid #2b6cb0; border-radius: 12px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); touch-action: manipulation; max-width: 100%; }
+    .form-container { margin-top: 15px; background: #2d3748; padding: 18px; border-radius: 10px; width: 320px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
     .form-container h3 { text-align: center; color: #f6ad55; margin-bottom: 5px; }
     .form-container p.score-text { text-align: center; margin-bottom: 12px; font-size: 14px; }
     label { font-size: 12px; color: #e2e8f0; margin-top: 6px; display: block; }
-    input, select { width: 100%; padding: 10px; margin: 4px 0 10px 0; border-radius: 5px; border: 1px solid #4a5568; background: #1a202c; color: white; font-size: 14px; }
-    button { width: 100%; padding: 11px; background: #3182ce; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; }
+    input, select { width: 100%; padding: 10px; margin: 4px 0 10px 0; border-radius: 6px; border: 1px solid #4a5568; background: #1a202c; color: white; font-size: 14px; }
+    button { width: 100%; padding: 11px; background: #3182ce; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
     button:hover { background: #2b6cb0; }
-    #statusMsg { margin-top: 10px; font-size: 12px; text-align: center; color: #68d391; font-weight: bold; }
+    #statusMsg { margin-top: 10px; font-size: 12px; text-align: center; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <h1>🚑 AMO Terengganu: Ambulans Dash</h1>
-  <p>Tap skrin / tekan Spacebar untuk elak halangan!</p>
+  <p>Tap skrin / tekan Spacebar untuk kawal Ambulans!</p>
 
   <canvas id="gameCanvas" width="320" height="420"></canvas>
 
@@ -67,31 +67,70 @@
     const ctx = canvas.getContext("2d");
 
     // PASTE URL GOOGLE APPS SCRIPT ANDA DI SINI
-    const SCRIPT_URL = "GANTI_DENGAN_URL_WEB_APP_ANDA";
+    const SCRIPT_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzBd9zy6iiW5BORG78j0gbK9A6aCSMPWe9E_-HkrN681at7OaDsMnbdk7iXBatqHT1WtQ/exec";
 
-    let ambulans = { x: 50, y: 150, w: 30, h: 20, gravity: 0.35, lift: -6.5, velocity: 0 };
+    let ambulans = { x: 50, y: 150, w: 38, h: 26, gravity: 0.35, lift: -6.5, velocity: 0 };
     let obstacles = [];
     let frame = 0;
     let score = 0;
     let gameOver = false;
     let gameStarted = false;
 
+    // LUKISAN AMBULANS 3D KEMAS & MODEN
     function drawAmbulans() {
-      // Badan Ambulans
+      let x = ambulans.x;
+      let y = ambulans.y;
+
+      // 1. Bayangan 3D di bawah
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.beginPath();
+      ctx.ellipse(x + 19, y + 28, 16, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Sisi Gelap 3D (Depth)
+      ctx.fillStyle = "#cbd5e0";
+      ctx.fillRect(x + 3, y + 3, 35, 20);
+
+      // 3. Badan Utama (Putih Bersih)
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(ambulans.x, ambulans.y, ambulans.w, ambulans.h);
-      // Palang Merah Kecemasan
+      ctx.fillRect(x, y, 35, 20);
+
+      // 4. Bumbung 3D (Lengkung Putih Terang)
+      ctx.fillStyle = "#f7fafc";
+      ctx.fillRect(x + 2, y - 3, 30, 5);
+
+      // 5. Cermin Hadapan (3D Blue Glass Effect)
+      ctx.fillStyle = "#2b6cb0";
+      ctx.fillRect(x + 24, y + 3, 9, 8);
+      ctx.fillStyle = "#63b3ed"; // Kilauan cermin
+      ctx.fillRect(x + 26, y + 4, 4, 4);
+
+      // 6. Jalur Merah & Lambang Palang Merah
       ctx.fillStyle = "#e53e3e";
-      ctx.fillRect(ambulans.x + 12, ambulans.y + 4, 6, 12);
-      ctx.fillRect(ambulans.x + 9, ambulans.y + 7, 12, 6);
-      // Tayar
-      ctx.fillStyle = "#000000";
-      ctx.fillRect(ambulans.x + 4, ambulans.y + 18, 6, 4);
-      ctx.fillRect(ambulans.x + 20, ambulans.y + 18, 6, 4);
+      ctx.fillRect(x, y + 12, 35, 4); // Jalur badan
+      ctx.fillRect(x + 11, y + 4, 6, 6); // Palang Merah
+      ctx.fillRect(x + 13, y + 2, 2, 10);
+
+      // 7. Lampu Siren 3D (Berkelip Merah & Biru + Effect Light Glow)
+      let sirenColor = (frame % 16 < 8) ? "#e53e3e" : "#3182ce";
+      ctx.fillStyle = sirenColor;
+      ctx.shadowColor = sirenColor;
+      ctx.shadowBlur = 8;
+      ctx.fillRect(x + 13, y - 7, 9, 4);
+      ctx.shadowBlur = 0; // Reset glow
+
+      // 8. Tayar 3D & Rim Perak
+      ctx.fillStyle = "#1a202c";
+      ctx.fillRect(x + 6, y + 18, 8, 8);
+      ctx.fillRect(x + 22, y + 18, 8, 8);
+      
+      ctx.fillStyle = "#e2e8f0"; // Rim
+      ctx.fillRect(x + 8, y + 20, 4, 4);
+      ctx.fillRect(x + 24, y + 20, 4, 4);
     }
 
     function createObstacle() {
-      let gap = 115;
+      let gap = 120;
       let minHeight = 40;
       let maxHeight = canvas.height - gap - minHeight;
       let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
@@ -121,39 +160,53 @@
         obs.x -= 2;
 
         if (
-          ambulans.x < obs.x + 40 &&
+          ambulans.x < obs.x + 42 &&
           ambulans.x + ambulans.w > obs.x &&
           (ambulans.y < obs.top || ambulans.y + ambulans.h > canvas.height - obs.bottom)
         ) {
           endGame();
         }
 
-        if (obs.x + 40 < ambulans.x && !obs.passed) {
+        if (obs.x + 42 < ambulans.x && !obs.passed) {
           score++;
           obs.passed = true;
         }
       }
 
-      if (obstacles.length && obstacles[0].x < -40) obstacles.shift();
+      if (obstacles.length && obstacles[0].x < -42) obstacles.shift();
 
       frame++;
     }
 
     function draw() {
+      // Latar Langit
       ctx.fillStyle = "#70c5ce";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = "#4a5568";
+      // Halangan Bangunan 3D
       for (let obs of obstacles) {
-        ctx.fillRect(obs.x, 0, 40, obs.top);
-        ctx.fillRect(obs.x, canvas.height - obs.bottom, 40, obs.bottom);
+        // Bangunan Atas
+        ctx.fillStyle = "#2d3748";
+        ctx.fillRect(obs.x, 0, 42, obs.top);
+        ctx.fillStyle = "#4a5568";
+        ctx.fillRect(obs.x + 35, 0, 7, obs.top); // Sisi 3D
+
+        // Bangunan Bawah
+        ctx.fillStyle = "#2d3748";
+        ctx.fillRect(obs.x, canvas.height - obs.bottom, 42, obs.bottom);
+        ctx.fillStyle = "#4a5568";
+        ctx.fillRect(obs.x + 35, canvas.height - obs.bottom, 7, obs.bottom); // Sisi 3D
       }
 
       drawAmbulans();
 
+      // PAPARAN SKOR
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 18px Arial";
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 4;
       ctx.fillText("Skor: " + score, 15, 30);
+      ctx.shadowBlur = 0;
 
       if (!gameStarted) {
         ctx.fillStyle = "#1a202c";
